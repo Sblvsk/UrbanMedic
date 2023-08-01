@@ -1,20 +1,21 @@
 from rest_framework import serializers
-from .models import Doctor, Patient, Exercise
+
+from .models import Doctor, Exercise, Patient
 
 
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
-        fields = 'all'
+        fields = "all"
 
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = 'all'
+        fields = "all"
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercise
-        fields = 'all'
+        fields = "all"

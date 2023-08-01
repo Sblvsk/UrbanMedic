@@ -25,4 +25,4 @@ class Exercise(models.Model):
     patients = models.ManyToManyField(Patient, related_name="exercises_assigned")
 
     class Meta:
-        ordering = ['title']
+        ordering = ["title"]

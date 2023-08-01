@@ -1,36 +1,53 @@
+from rest_framework import generics
 from rest_framework import viewsets
-
-from .models import Doctor, Exercise, Patient
-from .serializers import DoctorSerializer, ExerciseSerializer, PatientSerializer, DoctorExerciseSerializer, \
-    PatientExerciseSerializer
-
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import Doctor, Patient, Exercise
+from .serializers import DoctorSerializer, PatientSerializer, ExerciseSerializer, ExerciseScheduledSerializer
+from datetime import date, timedelta
 
 class DoctorViewSet(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
 
-
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-
 
 class ExerciseViewSet(viewsets.ModelViewSet):
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
 
+    @action(detail=False, methods=['get'])
+    def exercises_by_doctor(self, request):
+        doctor_id = request.query_params.get('doctor_id')
+        if doctor_id is not None:
+            try:
+                doctor = Doctor.objects.get(pk=doctor_id)
+                exercises = doctor.exercise_doctors.all()
+                serializer = ExerciseSerializer(exercises, many=True)
+                return Response(serializer.data)
+            except Doctor.DoesNotExist:
+                return Response({"error": "Doctor not found."}, status=404)
+        else:
+            return Response({"error": "Doctor ID not provided."}, status=400)
 
-class DoctorExerciseListView(viewsets.ReadOnlyModelViewSet):
-    serializer_class = DoctorExerciseSerializer
+    @action(detail=False, methods=['get'])
+    def exercises_by_patient(self, request):
+        patient_id = request.query_params.get('patient_id')
+        if patient_id is not None:
+            try:
+                patient = Patient.objects.get(pk=patient_id)
+                exercises = patient.exercises_assigned.all()
+                serializer = ExerciseSerializer(exercises, many=True)
+                return Response(serializer.data)
+            except Patient.DoesNotExist:
+                return Response({"error": "Patient not found."}, status=404)
+        else:
+            return Response({"error": "Patient ID not provided."}, status=400)
 
-    def get_queryset(self):
-        doctor_id = self.kwargs['doctor_id']
-        return Exercise.objects.filter(doctors__id=doctor_id)
-
-
-class PatientExerciseListView(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PatientExerciseSerializer
-
-    def get_queryset(self):
-        patient_id = self.kwargs['patient_id']
-        return Exercise.objects.filter(patients__id=patient_id)
+    @action(detail=False, methods=['get'])
+    def exercises_scheduled(self, request):
+        exercises = Exercise.objects.all()
+        serializer = ExerciseScheduledSerializer(exercises, many=True)
+        return Response(serializer.data)

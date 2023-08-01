@@ -21,6 +21,4 @@ class Exercise(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     periodicity = models.PositiveIntegerField()
-    doctors = models.ManyToManyField(Doctor, related_name='exercise_doctors')
-
-
+    doctors = models.ManyToManyField(Doctor, related_name="exercise_doctors")
